@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting...</title>
+
+    <script>
+      // 2. CONFIGURE YOUR DESTINATION
+      // This is the SINGLE Apple Campaign Link you generated in App Store Connect
+      const APPLE_CAMPAIGN_URL = "https://apps.apple.com/hu/app/rct-find-your-money/id6751210880"; 
+
+      // Function to parse URL parameters
+      function getQueryParams() {
+          const params = new URLSearchParams(window.location.search);
+          return {
+              location: params.get('loc') || 'unknown',
+              color: params.get('col') || 'unknown',
+              type: params.get('type') || 'unknown'
+          };
+      }
+
+      // Main Logic
+      window.onload = function() {
+          const data = getQueryParams();
+
+          // Send Event to Google Analytics
+          if (typeof gtag === 'function') {
+              gtag('event', 'guerilla_scan', {
+                  'scan_location': data.location,
+                  'scan_color': data.color,
+                  'scan_type': data.type,
+                  'event_callback': function() {
+                      // Redirect after data is sent (safe method)
+                      window.location.href = APPLE_CAMPAIGN_URL;
+                  }
+              });
+              
+              // Fallback redirect if GA4 takes too long (timeout 500ms)
+              setTimeout(function() {
+                  window.location.href = APPLE_CAMPAIGN_URL;
+              }, 500);
+          } else {
+              // If GA4 is blocked (adblockers), redirect immediately
+              window.location.href = APPLE_CAMPAIGN_URL;
+          }
+      };
+    </script>
+</head>
+<body>
+    <p>Loading App Store...</p>
+</body>
+</html>
