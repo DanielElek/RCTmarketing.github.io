@@ -3,51 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redirecting...</title>
+    <title>RCT - Loading...</title>
 
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
     <script>
-      // 2. CONFIGURE YOUR DESTINATION
-      // This is the SINGLE Apple Campaign Link you generated in App Store Connect
-      const APPLE_CAMPAIGN_URL = "https://apps.apple.com/hu/app/rct-find-your-money/id6751210880"; 
+        // --- CONFIGURATION ---
+        const GA_MEASUREMENT_ID = 'G-W3FKJL0QQ2'; // Replace with your ID
 
-      // Function to parse URL parameters
-      function getQueryParams() {
-          const params = new URLSearchParams(window.location.search);
-          return {
-              location: params.get('loc') || 'unknown',
-              color: params.get('col') || 'unknown',
-              type: params.get('type') || 'unknown'
-          };
-      }
+        // MAP LOCATIONS TO SPECIFIC APPLE LINKS
+        // Keys must match the 'LOCATIONS' list in your Python script
+        const CAMPAIGN_URLS = {
+            'wu_wien':       "https://apps.apple.com/app/apple-store/id6751210880?pt=128027164&ct=vienna_wu&mt=8",
+            'tu_wien':  "https://apps.apple.com/app/apple-store/id6751210880?pt=128027164&ct=vienna_tu&mt=8",
+            'uni_wien': "https://apps.apple.com/app/apple-store/id6751210880?pt=128027164&ct=vienna_uni&mt=8",
+            'default':  "https://apps.apple.com/app/apple-store/id6751210880?pt=128027164&ct=vienna_general&mt=8"
+        };
 
-      // Main Logic
-      window.onload = function() {
-          const data = getQueryParams();
+        // --- TRACKING LOGIC ---
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', GA_MEASUREMENT_ID);
 
-          // Send Event to Google Analytics
-          if (typeof gtag === 'function') {
-              gtag('event', 'guerilla_scan', {
-                  'scan_location': data.location,
-                  'scan_color': data.color,
-                  'scan_type': data.type,
-                  'event_callback': function() {
-                      // Redirect after data is sent (safe method)
-                      window.location.href = APPLE_CAMPAIGN_URL;
-                  }
-              });
-              
-              // Fallback redirect if GA4 takes too long (timeout 500ms)
-              setTimeout(function() {
-                  window.location.href = APPLE_CAMPAIGN_URL;
-              }, 500);
-          } else {
-              // If GA4 is blocked (adblockers), redirect immediately
-              window.location.href = APPLE_CAMPAIGN_URL;
-          }
-      };
+        function getParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                loc: params.get('loc') || 'unknown',
+                col: params.get('col') || 'unknown',
+                typ: params.get('type') || 'unknown'
+            };
+        }
+
+        window.onload = function() {
+            const p = getParams();
+            
+            // Determine Destination: Check if 'loc' exists in our map, otherwise use default
+            const destination = CAMPAIGN_URLS[p.loc] || CAMPAIGN_URLS['default'];
+
+            // 1. Send Data to Google
+            gtag('event', 'guerilla_scan', {
+                // These keys on the LEFT must match your GA4 Custom Dimensions EXACTLY:
+                'scan_location_vienna': p.loc,   // Changed from 'scan_location'
+                'scan_color_vienna': p.col,      // Changed from 'scan_color'
+                'scan_type_vienna': p.typ,       // Changed from 'scan_type'
+                
+                'event_callback': () => { window.location.href = destination; }
+            });
+
+            // 2. Failsafe Redirect (to the specific campus link)
+            setTimeout(() => {
+                window.location.href = destination;
+            }, 500);
+        };
     </script>
 </head>
-<body>
+<body style="background-color: #000; color: #fff; font-family: sans-serif; text-align: center; padding-top: 50px;">
     <p>Loading App Store...</p>
 </body>
 </html>
