@@ -5,18 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RCT - Loading...</title>
 
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-W3FKJL0QQ2"></script>
     <script>
         // --- CONFIGURATION ---
-        const GA_MEASUREMENT_ID = 'G-W3FKJL0QQ2'; // Replace with your ID
+        const GA_MEASUREMENT_ID = 'G-W3FKJL0QQ2'; 
 
         // MAP LOCATIONS TO SPECIFIC APPLE LINKS
-        // Keys must match the 'LOCATIONS' list in your Python script
         const CAMPAIGN_URLS = {
-            'wu_wien':       "https://apps.apple.com/app/apple-store/id6751210880?pt=128027164&ct=vienna_wu&mt=8",
-            'tu_wien':  "https://apps.apple.com/app/apple-store/id6751210880?pt=128027164&ct=vienna_tu&mt=8",
-            'uni_wien': "https://apps.apple.com/app/apple-store/id6751210880?pt=128027164&ct=vienna_uni&mt=8",
-            'default':  "https://apps.apple.com/app/apple-store/id6751210880?pt=128027164&ct=vienna_general&mt=8"
+            // --- GYŐR LOCATIONS ---
+            'szechenyi': "https://apps.apple.com/app/apple-store/id6751210880?pt=128027164&ct=szechenyi&mt=8",
+
+            // --- VIENNA LOCATIONS (Kept so old stickers still work) ---
+            'wu_wien':   "https://apps.apple.com/app/apple-store/id6751210880?pt=128027164&ct=vienna_wu&mt=8",
+            'tu_wien':   "https://apps.apple.com/app/apple-store/id6751210880?pt=128027164&ct=vienna_tu&mt=8",
+            'uni_wien':  "https://apps.apple.com/app/apple-store/id6751210880?pt=128027164&ct=vienna_uni&mt=8",
+            
+            // --- FALLBACK ---
+            'default':   "https://apps.apple.com/app/apple-store/id6751210880?pt=128027164&ct=general_fallback&mt=8"
         };
 
         // --- TRACKING LOGIC ---
@@ -37,20 +42,21 @@
         window.onload = function() {
             const p = getParams();
             
-            // Determine Destination: Check if 'loc' exists in our map, otherwise use default
+            // 1. Determine Destination
+            // If the location isn't in our list (e.g. random text), go to default
             const destination = CAMPAIGN_URLS[p.loc] || CAMPAIGN_URLS['default'];
 
-            // 1. Send Data to Google
+            // 2. Send Data to Google
+            // NOTE: I removed "_vienna" from the keys so this works for ALL cities.
             gtag('event', 'guerilla_scan', {
-                // These keys on the LEFT must match your GA4 Custom Dimensions EXACTLY:
-                'scan_location_vienna': p.loc,   // Changed from 'scan_location'
-                'scan_color_vienna': p.col,      // Changed from 'scan_color'
-                'scan_type_vienna': p.typ,       // Changed from 'scan_type'
+                'scan_location': p.loc,   
+                'scan_color':    p.col,      
+                'scan_type':     p.typ,       
                 
                 'event_callback': () => { window.location.href = destination; }
             });
 
-            // 2. Failsafe Redirect (to the specific campus link)
+            // 3. Failsafe Redirect
             setTimeout(() => {
                 window.location.href = destination;
             }, 500);
