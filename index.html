@@ -15,7 +15,7 @@
             // --- GYŐR LOCATIONS ---
             'szechenyi': "https://apps.apple.com/app/apple-store/id6751210880?pt=128027164&ct=szechenyi&mt=8",
 
-            // --- VIENNA LOCATIONS (Kept so old stickers still work) ---
+            // --- VIENNA LOCATIONS ---
             'wu_wien':   "https://apps.apple.com/app/apple-store/id6751210880?pt=128027164&ct=vienna_wu&mt=8",
             'tu_wien':   "https://apps.apple.com/app/apple-store/id6751210880?pt=128027164&ct=vienna_tu&mt=8",
             'uni_wien':  "https://apps.apple.com/app/apple-store/id6751210880?pt=128027164&ct=vienna_uni&mt=8",
@@ -34,7 +34,7 @@
             const params = new URLSearchParams(window.location.search);
             return {
                 loc: params.get('loc') || 'unknown',
-                col: params.get('col') || 'unknown',
+                col: params.get('col') || 'unknown', // We still read 'col' from URL
                 typ: params.get('type') || 'unknown'
             };
         }
@@ -43,14 +43,13 @@
             const p = getParams();
             
             // 1. Determine Destination
-            // If the location isn't in our list (e.g. random text), go to default
             const destination = CAMPAIGN_URLS[p.loc] || CAMPAIGN_URLS['default'];
 
             // 2. Send Data to Google
-            // NOTE: I removed "_vienna" from the keys so this works for ALL cities.
             gtag('event', 'guerilla_scan', {
+                // These keys strictly match your new GA4 Event Parameters:
                 'scan_location': p.loc,   
-                'scan_color':    p.col,      
+                'scan_copy':     p.col,      // Mapped URL 'col' -> GA4 'scan_copy'
                 'scan_type':     p.typ,       
                 
                 'event_callback': () => { window.location.href = destination; }
